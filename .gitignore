@@ -1,0 +1,6 @@
+backup
+
+portraits/female/*
+portraits/male/*
+!portraits/female/.gitkeep
+!portraits/male/.gitkeep

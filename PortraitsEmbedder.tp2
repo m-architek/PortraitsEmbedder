@@ -1,0 +1,43 @@
+BACKUP ~PortraitsEmbedder/backup~
+SUPPORT ~https://github.com/m-architek/PortraitsEmbedder~
+VERSION ~v0.1~
+
+BEGIN "Embed portraits"
+
+DEFINE_ACTION_FUNCTION embed_portraits
+  INT_VAR gender_id = ~~
+  STR_VAR portraits_str = 0
+    gender_dir = 0
+  RET portraits_str
+BEGIN
+  ACTION_BASH_FOR ~PortraitsEmbedder/portraits/%gender_dir%~ ~.*\.bmp~ BEGIN
+    COPY ~%BASH_FOR_FILESPEC%~ ~override~
+    SPRINT portraits_str ~%portraits_str%~ ^ ~{'%BASH_FOR_RES%', %gender_id%},~
+  END
+END
+
+WITH_SCOPE BEGIN
+  OUTER_SPRINT portraits_str ~portraits = {~
+
+  LAF embed_portraits
+    INT_VAR gender_id = 1
+    STR_VAR portraits_str = EVALUATE_BUFFER ~%portraits_str%~
+      gender_dir = ~male~
+    RET portraits_str = portraits_str
+  END
+
+  LAF embed_portraits
+    INT_VAR gender_id = 2
+    STR_VAR portraits_str = EVALUATE_BUFFER ~%portraits_str%~
+      gender_dir = ~female~
+    RET portraits_str = portraits_str
+  END
+
+  OUTER_SPRINT portraits_str ~%portraits_str%~ ^ ~}~
+
+  OUTER_SPRINT s ~[%TAB% %LNL%%MNL%%WNL%]~
+
+  COPY_EXISTING ~bgee.lua~ ~override~
+    REPLACE_TEXTUALLY ~portraits%s%*=%s%*{\(%s%*-*{.*},?\)+%s%*}~ ~%portraits_str%~
+END
+ 
